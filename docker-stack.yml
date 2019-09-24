@@ -15,9 +15,17 @@ services:
       ELASTIC_PASSWORD: changeme
     networks:
       - elk
+    volumes:
+      - type: bind
+        source: ./elasticsearch/config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+      - /mydir/elasticsearch:/usr/share/elasticsearch/data
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints: [node.role == manager]
 
   logstash:
     image: docker.elastic.co/logstash/logstash:7.3.1
@@ -33,9 +41,20 @@ services:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
       - elk
+    volumes:
+      - type: bind
+        source: ./logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+      - type: bind
+        source: ./logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true 
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints: [node.role == manager]
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.3.1
@@ -46,9 +65,16 @@ services:
         target: /usr/share/kibana/config/kibana.yml
     networks:
       - elk
+    volumes:
+      - type: bind
+        source: ./kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints: [node.role == manager]
 
 configs:
 
