@@ -76,6 +76,24 @@ services:
       placement:
         constraints: [node.role == manager]
 
+  filebeat:
+    image: filebeat-custom:1.0
+    configs:
+      - source: filebeat_config
+        target: /usr/share/filebeat/filebeat.yml
+        mode: 0755
+    networks:
+      - elk
+    volumes:
+      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /mydir/filebeat/logs:/logs
+      - /mydir/filebeat/data:/usr/share/filebeat/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+
 configs:
 
   elastic_config:
@@ -86,6 +104,9 @@ configs:
     file: ./logstash/pipeline/logstash.conf
   kibana_config:
     file: ./kibana/config/kibana.yml
+  filebeat_config:
+    file: ./filebeat/config/filebeat.yml
+
 
 networks:
   elk:
